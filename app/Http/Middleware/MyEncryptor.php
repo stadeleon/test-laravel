@@ -17,13 +17,8 @@ class MyEncryptor
 
     public function __construct($key)
     {
-        $key_size =  strlen($key);
-        if (in_array($key_size , [16, 24, 32])) {
-            $this->key = $key;
-            $this->iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
-        } else {
-            throw new \Exception('key size use either 16, 24 or 32 byte keys for AES-128, 192 and 256 respectively');
-        }
+        $this->setPassword($key);
+        $this->iv_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_128, MCRYPT_MODE_CBC);
     }
 
     public function encryptMessage($message) {
@@ -59,5 +54,13 @@ class MyEncryptor
         return mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $this->key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
 
 
+    }
+
+    private function setPassword($key) {
+        $key_size =  strlen($key);
+        if (!in_array($key_size , [16, 24, 32])) {
+            $key = str_pad($key, 32, "\0");
+        }
+        $this->key = $key;
     }
 }

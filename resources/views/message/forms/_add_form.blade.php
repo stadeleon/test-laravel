@@ -8,8 +8,8 @@
     {!! Form::select('destruct_type', ['instantly' => 'instantly', 'timeout' => 'timeout']) !!}
 </div>
 <div class="form-group">
-    {!! Form::label('is active') !!}
-    {!! Form::checkbox('status', null, true) !!}
+    {!! Form::label('enter password to encrypt message') !!}
+    {!! Form::text('password', null, array('placeholder' => 'max 32 symbols','maxlength' => 32 )) !!}
 </div>
 <div class="form-group">
     {!! Form::label('created at') !!}

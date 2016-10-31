@@ -7,7 +7,7 @@
     </div>
     @foreach($messages as $message)
         <message>
-            <h2>{!! $message->enc_key !!}</h2>
+            <h2>{!! $message->link !!}</h2>
             <p>
                 {{ $message->message }}
             </p>

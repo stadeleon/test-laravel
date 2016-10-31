@@ -45,7 +45,7 @@ class MessageController extends Controller
     public function store(Message $messageModel, Request $request)
     {
         $message = $request->message;
-        $key = "mypassword\0\0\0\0\0\0";
+        $key = $request->password;
         $encryptor = new MyEncryptor($key);
 
         $encryptedMessage = $encryptor->encryptMessage($message);
@@ -55,9 +55,8 @@ class MessageController extends Controller
 
         $data = [
             'message' => $encryptedMessage,
-            'enc_key' => $link,
+            'link' => $link,
             'destruct_type' => $request->destruct_type,
-            'status' => $request->status ? true : false,
             'created_time' => $request->created_time
         ];
 
@@ -84,11 +83,11 @@ class MessageController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Message $messageModel, $key)
+    public function show(Message $messageModel, $id, Request $request)
     {
-        $messageRow = $messageModel->getValidMessageByKey($key);
+        $messageRow = $messageModel->getValidMessageByKey($id);
         if ($messageRow) {
-            $key = "mypassword\0\0\0\0\0\0";
+            $key = $request->p;
             $encryptor = new MyEncryptor($key);
 
             $data = ['message' => $encryptor->decryptMessage($messageRow->message)];

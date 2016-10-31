@@ -18,7 +18,7 @@ class MessagesTableSeeder extends Seeder
         DB::table('messages')->delete();
         Message::create([
             'message' => 'test text',
-            'enc_key' => 'some key',
+            'link' => 'some key',
             'destruct_type' => 'instantly',
             'created_time' => Carbon::now(),
             'status' => true,
@@ -32,7 +32,7 @@ class MessagesTableSeeder extends Seeder
 
         Message::create([
             'message' => $encryptedText,
-            'enc_key' => $decryptedText,
+            'link' => $decryptedText,
             'destruct_type' => 'instantly',
             'created_time' => Carbon::now(),
             'status' => true,
@@ -46,7 +46,7 @@ class MessagesTableSeeder extends Seeder
 
         Message::create([
             'message' => $encryptedTextWithPass,
-            'enc_key' => $decryptedTextWithPass,
+            'link' => $decryptedTextWithPass,
             'destruct_type' => 'instantly',
             'created_time' => Carbon::now(),
             'status' => false,
@@ -59,7 +59,7 @@ class MessagesTableSeeder extends Seeder
 
         Message::create([
             'message' => $encryptedText,
-            'enc_key' => $decryptedText,
+            'link' => $decryptedText,
             'destruct_type' => 'timeout',
             'created_time' => Carbon::now(),
             'status' => true,

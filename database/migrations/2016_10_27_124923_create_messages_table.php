@@ -16,7 +16,7 @@ class CreateMessagesTable extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->increments('id');
             $table->text('message')->nullable();
-            $table->string('enc_key')->nullable();
+            $table->string('link')->nullable();
             $table->enum('destruct_type', ['instantly', 'timeout']);
             $table->timestamp('created_time')->nullable();
             $table->boolean('status')->default(true);
