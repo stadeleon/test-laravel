@@ -5,7 +5,10 @@
         @include('message.forms._add_form')
         {!! Form::close() !!}
     </h1>
+
     <div id="link_to_shared_message"></div>
+    <script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/aes.js"></script>
+
     <script>
         $(document).ready(function($){
             $('.creation_form-form').on('submit', function(e){
@@ -31,6 +34,9 @@
                         .error(function(data){
                         });
             });
+
+            var encryptedAES = CryptoJS.AES.encrypt("Message", "My Secret Passphrase");
+            var decrypted    = CryptoJS.AES.decrypt(encryptedAES, "My Secret Passphrase");
         });
     </script>
 @stop

@@ -68,9 +68,8 @@ class MessageController extends Controller
 
             $linkPartOne = substr($key, 0, 10);
             $linkPartTwo = substr($key, 10);
+//            $link = link_to_route("message.show", 'Link to your secret message', ['message' => $link]);
 
-//            $link = url('/message') . '/' . $link;
-            $link = route("message.show", ['message' => $link]);
             return view('message.link_to_message', ['link' => $link]);
         }
 //        }
