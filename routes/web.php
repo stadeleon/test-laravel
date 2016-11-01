@@ -19,6 +19,7 @@ Auth::routes();
 
 //Route::get('/home', 'HomeController@index');
 Route::get('/', ['as' => 'messages', 'uses' => 'MessageController@index']);
+Route::post('/message/{message}', 'MessageController@show');
 Route::get('invalid', ['as' => 'messages.invalid', 'uses' => 'MessageController@invalid']);
 
 $router->resource('message', 'MessageController');

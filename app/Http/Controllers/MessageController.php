@@ -69,7 +69,8 @@ class MessageController extends Controller
             $linkPartOne = substr($key, 0, 10);
             $linkPartTwo = substr($key, 10);
 
-            $link = url('/message') . '/' . $link;
+//            $link = url('/message') . '/' . $link;
+            $link = route("message.show", ['message' => $link]);
             return view('message.link_to_message', ['link' => $link]);
         }
 //        }
@@ -83,17 +84,27 @@ class MessageController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Message $messageModel, $id, Request $request)
+    public function show(Message $messageModel, $link, Request $request)
     {
-        $messageRow = $messageModel->getValidMessageByKey($id);
-        if ($messageRow) {
-            $key = $request->p;
-            $encryptor = new MyEncryptor($key);
-
-            $data = ['message' => $encryptor->decryptMessage($messageRow->message)];
-            return view('message.show', $data);
+        $messageRow = $messageModel->getValidMessageByKey($link);
+        if (!$messageRow) {
+            return view('message.not_existent_link');
         }
-        return view('message.not_existent_link');
+
+        $key = $request->password;
+        if(empty($key)) {
+            $data = [
+                'link' => $link
+            ];
+            return view('message.authorize_message', $data);
+        }
+
+        $encryptor = new MyEncryptor($key);
+
+        $data = ['message' => $encryptor->decryptMessage($messageRow->message)];
+        return view('message.show', $data);
+
+
     }
 
     /**
