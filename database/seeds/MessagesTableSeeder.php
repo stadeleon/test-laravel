@@ -3,8 +3,8 @@
 use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Message;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Crypt;
+use App\Http\Middleware\MyEncryptor;
+use Illuminate\Support\Facades\Hash;
 
 class MessagesTableSeeder extends Seeder
 {
@@ -16,52 +16,66 @@ class MessagesTableSeeder extends Seeder
     public function run()
     {
         DB::table('messages')->delete();
-        Message::create([
-            'message' => 'test text',
-            'link' => 'some key',
-            'destruct_type' => 'instantly',
-            'created_time' => Carbon::now(),
-            'status' => true,
-        ]);
 
         $secret = "секрет";
-        $password = 'my_original pa$$word';
+        $key = 'my_original pa$$word';
 
-        $encryptedText = Crypt::encrypt($secret);
-        $decryptedText = Crypt::decrypt($encryptedText);
+        $link    = md5(uniqid(rand(),true));
+        $encryptor        = new MyEncryptor($key);
+        $passwordHash     = Hash::make($key);
+        $encryptedMessage = $encryptor->encryptMessage($secret);
 
         Message::create([
-            'message' => $encryptedText,
-            'link' => $decryptedText,
+            'message' => $encryptedMessage,
+            'link' => $link,
+            'password_hash' => $passwordHash,
             'destruct_type' => 'instantly',
-            'created_time' => Carbon::now(),
+            'time_to_live' => '300',
             'status' => true,
         ]);
 
-//        Crypt::setKey($password);
-        $encryptedTextWithPass = Crypt::encrypt($secret);
-//        Crypt::setKey(Config::get('app.key'));
+        $secret = "секрет 2";
+        $key = 'my pa$$word';
 
-        $decryptedTextWithPass = Crypt::decrypt($encryptedTextWithPass);
+        $link    = md5(uniqid(rand(),true));
+        $encryptor        = new MyEncryptor($key);
+        $passwordHash     = Hash::make($key);
+        $encryptedMessage = $encryptor->encryptMessage($secret);
 
         Message::create([
-            'message' => $encryptedTextWithPass,
-            'link' => $decryptedTextWithPass,
+            'message' => $encryptedMessage,
+            'link' => $link,
+            'password_hash' => $passwordHash,
             'destruct_type' => 'instantly',
-            'created_time' => Carbon::now(),
+            'time_to_live' => '100',
+            'status' => true,
+        ]);
+
+        $link    = md5(uniqid(rand(),true));
+        $encryptor        = new MyEncryptor($key);
+        $passwordHash     = Hash::make($key);
+        $encryptedMessage = $encryptor->encryptMessage($secret);
+
+        Message::create([
+            'message' => $encryptedMessage,
+            'link' => $link,
+            'password_hash' => $passwordHash,
+            'destruct_type' => 'instantly',
+            'time_to_live' => '200',
             'status' => false,
         ]);
 
-
-//        Crypt::setKey($password);
-//        $encryptedTextWithPass = Crypt::encrypt($secret);
-//        $decryptedTextWithPass = Crypt::decrypt($encryptedTextWithPass);
+        $link    = md5(uniqid(rand(),true));
+        $encryptor        = new MyEncryptor($key);
+        $passwordHash     = Hash::make($key);
+        $encryptedMessage = $encryptor->encryptMessage($secret);
 
         Message::create([
-            'message' => $encryptedText,
-            'link' => $decryptedText,
+            'message' => $encryptedMessage,
+            'link' => $link,
+            'password_hash' => $passwordHash,
             'destruct_type' => 'timeout',
-            'created_time' => Carbon::now(),
+            'time_to_live' => '500',
             'status' => true,
         ]);
     }

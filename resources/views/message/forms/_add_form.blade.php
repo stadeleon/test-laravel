@@ -12,8 +12,8 @@
     {!! Form::text('password', null, array('placeholder' => 'max 32 symbols','maxlength' => 32 )) !!}
 </div>
 <div class="form-group">
-    {!! Form::label('created at') !!}
-    {!! Form::input('date', 'created_time', date('Y-m-d'), ['class' => 'form-control']) !!}
+    {!! Form::label('time to live') !!}
+    {!! Form::input('number', 'time_to_live', 3600, ['class' => 'form-control']) !!}
 </div>
 <div class="form-group">
     {!! Form::submit('Create', ['class' => 'btn btn-primary']) !!}

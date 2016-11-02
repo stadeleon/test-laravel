@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Middleware\MyEncryptor;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Crypt;
 use App\Models\Message;
-use App\Http\Controllers\Controller;
+use App\Http\Middleware\MessageHelper;
+use App\Http\Middleware\MyEncryptor;
+use Illuminate\Support\Facades\Hash;
 
 class MessageController extends Controller
 {
@@ -44,37 +44,26 @@ class MessageController extends Controller
      */
     public function store(Message $messageModel, Request $request)
     {
+        $key     = $request->password;
         $message = $request->message;
-        $key = $request->password;
-        $encryptor = new MyEncryptor($key);
+        $link    = md5(uniqid(rand(),true));
 
+        $encryptor        = new MyEncryptor($key);
+        $passwordHash     = Hash::make($key);
         $encryptedMessage = $encryptor->encryptMessage($message);
 
-
-        $link = md5(uniqid(rand(),true));
-
         $data = [
-            'message' => $encryptedMessage,
-            'link' => $link,
+            'link'          => $link,
+            'message'       => $encryptedMessage,
+            'password_hash' => $passwordHash,
             'destruct_type' => $request->destruct_type,
-            'created_time' => $request->created_time
+            'time_to_live'  => $request->time_to_live
         ];
 
-//        if($request->ajax()) // This is what i am needing.
-//        {
-        $id = $messageModel->insertGetId($data);
-        if ($id) {
-            $key = md5($id);
-
-            $linkPartOne = substr($key, 0, 10);
-            $linkPartTwo = substr($key, 10);
-//            $link = link_to_route("message.show", 'Link to your secret message', ['message' => $link]);
-
+        $message = $messageModel->create($data);
+        if ($message->id) {
             return view('message.link_to_message', ['link' => $link]);
         }
-//        }
-
-//        return redirect()->route('messages');
     }
 
     /**
@@ -90,16 +79,30 @@ class MessageController extends Controller
             return view('message.not_existent_link');
         }
 
+        if('instantly' == $messageRow->destruct_type) {
+            $notice = "Link will be destroyed after opening";
+        } else {
+            $notice = "Link will be destroyed in";
+        }
+        $data['notice'] = $notice;
+        $data['link']   = $link;
+        $data['err']    = false;
         $key = $request->password;
         if(empty($key)) {
-            $data = [
-                'link' => $link
-            ];
+            $data['err'] = true;
+            $flashMessage = 'Enter password';
+        }
+        if(!empty($request->password) && !Hash::check($key, $messageRow->password_hash)) {
+            $data['err'] = true;
+            $flashMessage = 'Incorrect password';
+        }
+        if ($data['err']) {
+            \Session::flash('flash_message', ['type' => 'info', 'message' => $flashMessage]);
             return view('message.authorize_message', $data);
         }
 
+        $status = MessageHelper::updateMessageStatus($messageRow);
         $encryptor = new MyEncryptor($key);
-
         $data = ['message' => $encryptor->decryptMessage($messageRow->message)];
         return view('message.show', $data);
 

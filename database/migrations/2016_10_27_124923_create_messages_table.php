@@ -17,8 +17,9 @@ class CreateMessagesTable extends Migration
             $table->increments('id');
             $table->text('message')->nullable();
             $table->string('link')->nullable();
+            $table->string('password_hash')->nullable();
             $table->enum('destruct_type', ['instantly', 'timeout']);
-            $table->timestamp('created_time')->nullable();
+            $table->integer('time_to_live')->nullable();
             $table->boolean('status')->default(true);
             $table->timestamps();
         });

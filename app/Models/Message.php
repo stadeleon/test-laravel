@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Message extends Model
 {
     protected $table = 'messages';
-    protected $fillable = ['id', 'message', 'link', 'destruct_type', 'created_time', 'status', 'created_at', 'updated_at'];
+    protected $fillable = ['id', 'message', 'link', 'password_hash', 'destruct_type', 'time_to_live', 'status', 'created_at', 'updated_at'];
     public function getAllValidMessages() {
         $messages = Message::latest('created_at')
             ->valid()
