@@ -74,36 +74,65 @@ class MessageController extends Controller
      */
     public function show(Message $messageModel, $link, Request $request)
     {
+        $err = false;
+        $status = 1;
+
         $messageRow = $messageModel->getValidMessageByKey($link);
         if (!$messageRow) {
             return view('message.not_existent_link');
         }
+        $isExpired = MessageHelper::isMessageExpired($messageRow);
+//        if ($isExpired) {
+//            $err = true;
+//            $status = 0;
+//        } else {
+//            $status = 1;
+//        }
 
-        if('instantly' == $messageRow->destruct_type) {
-            $notice = "Link will be destroyed after opening";
-        } else {
-            $notice = "Link will be destroyed in";
-        }
-        $data['notice'] = $notice;
         $data['link']   = $link;
-        $data['err']    = false;
         $key = $request->password;
-        if(empty($key)) {
-            $data['err'] = true;
-            $flashMessage = 'Enter password';
-        }
-        if(!empty($request->password) && !Hash::check($key, $messageRow->password_hash)) {
-            $data['err'] = true;
-            $flashMessage = 'Incorrect password';
-        }
-        if ($data['err']) {
-            \Session::flash('flash_message', ['type' => 'info', 'message' => $flashMessage]);
-            return view('message.authorize_message', $data);
+        if (empty($key) && !$err) {
+            $err = true;
         }
 
-        $status = MessageHelper::updateMessageStatus($messageRow);
+        if(!$err && 'instantly' == $messageRow->destruct_type) {
+            $status = 0;
+            $flash = ['type' => 'danger', 'message' => 'Link will be destroyed after opening'];
+        } else if (!$isExpired){
+            $flash = ['type' => 'info', 'message' => 'Enter password'];
+        }
+
+        if (!$err && !empty($request->password) && !Hash::check($key, $messageRow->password_hash)) {
+            $err = true;
+            $flash = ['type' => 'danger', 'message' => 'Incorrect password'];
+        }
+
+        if (!$err && $isExpired) {
+            $status = 0;
+            $messageModel->updateMessageStatus($messageRow, $status);
+            $flash = ['type' => 'danger', 'message' => 'WARNING THIS Message is unavailable because of timeout expired'];
+            $view = 'message.not_existent_link';
+        } else if (!$isExpired && $err) {
+            $view = 'message.authorize_message';
+        }
+
+        if ($err || $isExpired) {
+            \Session::flash('flash_message', $flash);
+            return view($view, $data);
+        }
+
+        if ('instantly' == $messageRow->destruct_type && !$err) {
+            $status = 0;
+            \Session::flash('flash_message', ['type' => 'danger', 'message' => 'THIS Message will be UNAVAILABLE after page refreshing']);
+        }
+
         $encryptor = new MyEncryptor($key);
         $data = ['message' => $encryptor->decryptMessage($messageRow->message)];
+
+        if (0 == $status) {
+            $messageModel->updateMessageStatus($messageRow, $status);
+        }
+
         return view('message.show', $data);
 
 

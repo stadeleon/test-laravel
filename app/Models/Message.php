@@ -29,6 +29,12 @@ class Message extends Model
         return $messages;
     }
 
+    public function updateMessageStatus(Message $messageRow, $newStatus){
+        return $messageRow
+            ->where('id', $messageRow->id)
+            ->update(array('status' => $newStatus));
+    }
+
     public function scopeValid($query) {
         $query->where('status', true);
     }

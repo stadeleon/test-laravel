@@ -1,3 +1,6 @@
+@extends('layouts.app')
+@section('content')
 <div>
-    requested Url does not exist
+    <h2>Requested Message does not exist or already expired</h2>
 </div>
+@stop
