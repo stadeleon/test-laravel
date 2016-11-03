@@ -24,8 +24,8 @@ class MessageHelper
             $date = new DateTime($messageRow->created_at);
             $interval = new DateInterval('PT' . $messageRow->time_to_live . 'S');
             $date->add($interval);
-            $iv = $date->diff($currentTime);
-            if (0 >= $iv->format("%r%a")) {
+            $iv = $currentTime->diff($date);
+            if ($date->getTimestamp() <= $currentTime->getTimestamp()) {
                 $status = 0;
             }
         }
@@ -35,11 +35,14 @@ class MessageHelper
                 ->where('id', $messageRow->id)
                 ->update(array('status' => $status));
             \Session::flash('flash_message_important', true);
-            \Session::flash('flash_message', ['type' => 'danger', 'message' => 'WARNING THIS Message will be unavailable after refreshing page']);
+            \Session::flash('flash_message', ['type' => 'danger', 'message' => 'WARNING THIS Message will be unavailable after the page refreshing']);
         } else {
-            \Session::flash('flash_message', ['type' => 'warning', 'message' => "WARNING THIS Now is {$currentTime->format('Y-m-d H:i:s')} Message will be unavailable at {$date->format('Y-m-d H:i:s')
-            } in {$iv->format('%h:%i:%s')}
-            "]);
+            \Session::flash('flash_message_important', true);
+            \Session::flash('flash_message', [
+                    'type' => 'warning',
+                    'message' => "WARNING THIS Message will be unavailable at {$date->format('Y-m-d H:i:s')} in {$iv->format('%h:%i:%s')}"
+                ]
+            );
         }
 
         return $status;
