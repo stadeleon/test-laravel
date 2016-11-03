@@ -32,10 +32,10 @@ class MessageHelper
             $message = "WARNING THIS Message will be unavailable at {$date->format('Y-m-d H:i:s')} in {$iv->format('%h:%i:%s')}";
         }
         \Session::flash('flash_message_important', true);
-        \Session::flash('flash_message', [
+        \Session::flash('flash_message', array(
                 'type' => $type,
                 'message' => $message
-            ]
+            )
         );
 
         return $isExpired;

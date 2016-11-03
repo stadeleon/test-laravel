@@ -82,12 +82,10 @@ class MessageController extends Controller
             return view('message.not_existent_link');
         }
         $isExpired = MessageHelper::isMessageExpired($messageRow);
-//        if ($isExpired) {
-//            $err = true;
-//            $status = 0;
-//        } else {
-//            $status = 1;
-//        }
+        if ($isExpired) {
+            $flash = array('type' => 'danger', 'message' => 'WARNING THIS Message is unavailable because of timeout expired');
+            $view = 'message.not_existent_link';
+        }
 
         $data['link']   = $link;
         $key = $request->password;
@@ -97,20 +95,19 @@ class MessageController extends Controller
 
         if(!$err && 'instantly' == $messageRow->destruct_type) {
             $status = 0;
-            $flash = ['type' => 'danger', 'message' => 'Link will be destroyed after opening'];
+            $flash = array('type' => 'danger', 'message' => 'Link will be destroyed after opening');
         } else if (!$isExpired){
             $flash = ['type' => 'info', 'message' => 'Enter password'];
         }
 
         if (!$err && !empty($request->password) && !Hash::check($key, $messageRow->password_hash)) {
             $err = true;
-            $flash = ['type' => 'danger', 'message' => 'Incorrect password'];
+            $flash = array('type' => 'danger', 'message' => 'Incorrect password');
         }
 
         if (!$err && $isExpired) {
             $status = 0;
             $messageModel->updateMessageStatus($messageRow, $status);
-            $flash = ['type' => 'danger', 'message' => 'WARNING THIS Message is unavailable because of timeout expired'];
             $view = 'message.not_existent_link';
         } else if (!$isExpired && $err) {
             $view = 'message.authorize_message';
@@ -123,7 +120,7 @@ class MessageController extends Controller
 
         if ('instantly' == $messageRow->destruct_type && !$err) {
             $status = 0;
-            \Session::flash('flash_message', ['type' => 'danger', 'message' => 'THIS Message will be UNAVAILABLE after page refreshing']);
+            \Session::flash('flash_message', array('type' => 'danger', 'message' => 'THIS Message will be UNAVAILABLE after page refreshing'));
         }
 
         $encryptor = new MyEncryptor($key);
